@@ -5,12 +5,13 @@ using ProtoGOAP.Utils.Collections;
 
 namespace ProtoGOAP.Graphs
 {
-	// TODO: Add the ability to limit search depth! (It's kind of necessary for infinite graphs.)
 	/// <summary>
 	/// This pathfinder uses A* algorithm to find paths on a graph.
 	/// </summary>
 	public class AstarPathfinder<GraphNode> : IPathfinder<GraphNode> where GraphNode : IGraphNode<GraphNode>
 	{
+		public const int UNLIMITED_SEARCH_DEPTH = -1;
+
 		/// <summary>
 		/// Partial path with estimated cost, comparable by estimated cost.
 		/// </summary>
@@ -36,6 +37,13 @@ namespace ProtoGOAP.Graphs
 			{
 				get {
 					return this.edges.Count == 0;
+				}
+			}
+
+			public int EdgeCount
+			{
+				get {
+					return this.edges.Count;
 				}
 			}
 
@@ -84,14 +92,25 @@ namespace ProtoGOAP.Graphs
 		}
 
 		private readonly PathCostHeuristic<GraphNode> heuristic;
+		private readonly int maxSearchDepth;
 
 		/// <summary>
 		/// Initializes a new instance of the <see cref="ProtoGOAP.Graphs.AstarPathfinder`1"/> class.
 		/// </summary>
 		/// <param name="heuristic">Heuristic to be used.</param>
-		public AstarPathfinder(PathCostHeuristic<GraphNode> heuristic)
+		/// <param name="maxSearchDepth">
+		/// Maximum depth for search, i.e. maximum number of edges, allowed in a path.
+		/// A negative value indicates no depth limit.
+		/// </param>
+		public AstarPathfinder(PathCostHeuristic<GraphNode> heuristic, int maxSearchDepth = UNLIMITED_SEARCH_DEPTH)
 		{
+			if(heuristic == null)
+			{
+				throw new ArgumentNullException("heuristic", "heuristic must not be null");
+			}
+
 			this.heuristic = heuristic;
+			this.maxSearchDepth = maxSearchDepth;
 		}
 
 		#region IPathfinder implementation
@@ -147,9 +166,19 @@ namespace ProtoGOAP.Graphs
 					return currentPartialPath.toPath();
 				}
 
-				// Mark currentNode as visited by placing it into closed set
-				// and insert paths from sourceNode to currentNode's neighbours into the open priority queue.
+				// If we have a limit on max search depth, and current path is at max depth limit, 
+				// don't add paths to currentNode's neighbours to the open priority queue, 
+				// since those paths will exceed the max search depth, and don't place currentNode
+				// into closed set, since there might be a more expensive path with smaller edge count,
+				// which leads to it without exceeding the max seatch depth limit.
+				if(this.maxSearchDepth >= 0 && currentPartialPath.EdgeCount >= this.maxSearchDepth)
+				{
+					continue;
+				}
+
+				// Mark currentNode as visited by placing it into closed set.
 				closed.Add(currentNode);
+				// Insert paths from sourceNode to currentNode's neighbours into the open priority queue
 				foreach(var outgoingEdge in currentNode.OutgoingEdges)
 				{
 					var neighbour = outgoingEdge.TargetNode;
