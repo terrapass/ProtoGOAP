@@ -94,6 +94,18 @@ namespace ProtoGOAP.Graphs
 		private readonly PathCostHeuristic<GraphNode> heuristic;
 		private readonly int maxSearchDepth;
 
+		public AstarPathfinder(AstarPathfinderConfiguration<GraphNode> configuration = null)
+		{
+			// If no configuration is provided, use default.
+			if(configuration == null)
+			{
+				configuration = new AstarPathfinderConfiguration<GraphNode>.Builder().Build();
+			}
+
+			this.heuristic = configuration.Heuristic;
+			this.maxSearchDepth = configuration.MaxSearchDepth;
+		}
+
 		/// <summary>
 		/// Initializes a new instance of the <see cref="ProtoGOAP.Graphs.AstarPathfinder`1"/> class.
 		/// </summary>
@@ -103,14 +115,12 @@ namespace ProtoGOAP.Graphs
 		/// A negative value indicates no depth limit.
 		/// </param>
 		public AstarPathfinder(PathCostHeuristic<GraphNode> heuristic, int maxSearchDepth = UNLIMITED_SEARCH_DEPTH)
+			: this(new AstarPathfinderConfiguration<GraphNode>.Builder()
+				.UseHeuristic(heuristic)
+				.LimitSearchDepth(maxSearchDepth)
+				.Build())
 		{
-			if(heuristic == null)
-			{
-				throw new ArgumentNullException("heuristic", "heuristic must not be null");
-			}
 
-			this.heuristic = heuristic;
-			this.maxSearchDepth = maxSearchDepth;
 		}
 
 		#region IPathfinder implementation

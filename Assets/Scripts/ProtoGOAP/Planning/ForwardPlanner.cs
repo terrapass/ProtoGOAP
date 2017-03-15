@@ -24,7 +24,12 @@ namespace ProtoGOAP.Planning
 				throw new ArgumentException("maxPlanLength must be positive", "maxPlanLength");
 			}
 			this.maxPlanLength = maxPlanLength;
-			this.pathfinder = new AstarPathfinder<ForwardNode>(PathfindingHeuristic, maxPlanLength);
+			this.pathfinder = new AstarPathfinder<ForwardNode>(
+				new AstarPathfinderConfiguration<ForwardNode>.Builder()
+					.UseHeuristic(PathfindingHeuristic)
+					.LimitSearchDepth(maxPlanLength)
+					.Build()
+			);
 		}
 
 		#region IPlanner implementation
