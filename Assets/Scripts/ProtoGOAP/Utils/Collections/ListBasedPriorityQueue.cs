@@ -30,8 +30,10 @@ namespace ProtoGOAP.Utils.Collections
 		#region ICollection implementation
 		public void Add(T item)
 		{
-			this.list.Add(item);
-			this.list.Sort(this.comparer);
+			int insertAt = 0;
+			for(; insertAt < list.Count && this.comparer.Compare(item, list[insertAt]) > 0; insertAt++)
+			{}
+			this.list.Insert(insertAt, item);
 		}
 
 		public void Clear()
