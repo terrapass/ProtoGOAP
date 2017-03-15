@@ -120,7 +120,7 @@ public class TestForwardPlanning : MonoBehaviour
 
 		try
 		{
-			DateTime startTime = DateTime.Now;
+			var timer = new SystemExecutionTimer();
 			var plan = planner.FormulatePlan(currentWorldState, availableActions, buildHouseGoal);
 			print(
 				string.Format(
@@ -128,7 +128,7 @@ public class TestForwardPlanning : MonoBehaviour
 					planner.GetType(), 
 					plan.ActionNames.Count(),
 					buildHouseGoal.Name,
-					(DateTime.Now - startTime).TotalSeconds
+					timer.ElapsedSeconds
 				)
 			);
 			print(plan.ToString());

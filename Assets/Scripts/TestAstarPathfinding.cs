@@ -3,6 +3,8 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+using Terrapass.Time;
+
 using ProtoGOAP.Graphs;
 
 public class TestAstarPathfinding : MonoBehaviour
@@ -140,9 +142,9 @@ public class TestAstarPathfinding : MonoBehaviour
 		d.AddOutgoingEdge(new Edge(d, f, 11));
 
 		var pathfinder = new AstarPathfinder<Node>(Heuristic);
-		DateTime startTime = DateTime.Now;
+		var timer = new SystemExecutionTimer();
 		var path = pathfinder.FindPath(a, f);
-		print(string.Format("In {1} seconds found the following path with cost {0} from A to F:", path.Cost, (DateTime.Now - startTime).TotalSeconds));
+		print(string.Format("In {1} seconds found the following path with cost {0} from A to F:", path.Cost, timer.ElapsedSeconds));
 		foreach(var edge in path.Edges)
 		{
 			print(edge);
