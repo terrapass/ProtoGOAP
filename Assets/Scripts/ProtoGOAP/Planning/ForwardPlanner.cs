@@ -46,25 +46,8 @@ namespace ProtoGOAP.Planning
 			// TODO: Ideally, world state should be populated lazily, not in advance, like here.
 			// Some symbols may not be needed at all to build a plan!
 			// (also see comments on IPrecondition and IEffect RelevantActions property)
-			WorldState initialWorldState = new WorldState();
-
-			availableActions.Aggregate(new List<SymbolId>(), (soFar, action) => {soFar.AddRange(action.GetRelevantSymbols()); return soFar;})
-				.ForEach((symbolId) => {
-					if(!initialWorldState.Contains(symbolId))
-					{
-						initialWorldState = initialWorldState.BuildUpon()
-							.SetSymbol(symbolId, knowledgeProvider.GetSymbolValue(symbolId)).Build();
-					}
-				});
-
-			foreach(SymbolId symbolId in goal.PreconditionSymbols)
-			{
-				if(!initialWorldState.Contains(symbolId))
-				{
-					initialWorldState = initialWorldState.BuildUpon()
-						.SetSymbol(symbolId, knowledgeProvider.GetSymbolValue(symbolId)).Build();
-				}
-			}
+			var initialWorldState = new RelevantSymbolsPopulator(availableActions, goal)
+				.PopulateWorldState(knowledgeProvider);
 
 			// TODO: After lazy population is implemented, the following part of the method is the only thing
 			// that must remain.
