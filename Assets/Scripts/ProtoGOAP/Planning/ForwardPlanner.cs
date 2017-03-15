@@ -8,6 +8,8 @@ using ProtoGOAP.Graphs;
 
 namespace ProtoGOAP.Planning
 {
+	using Internal;
+
 	public class ForwardPlanner : IPlanner
 	{
 		public const int DEFAULT_MAX_PLAN_LENGTH = 20;
@@ -34,7 +36,7 @@ namespace ProtoGOAP.Planning
 		)
 		{
 			// TODO: Ideally, world state should be populated lazily, not in advance, like here.
-			// Some simple may not be needed at all to build a plan!
+			// Some symbols may not be needed at all to build a plan!
 			// (also see comments on IPrecondition and IEffect RelevantActions property)
 			WorldState initialWorldState = new WorldState();
 
@@ -61,11 +63,11 @@ namespace ProtoGOAP.Planning
 			try
 			{
 				var path = this.pathfinder.FindPath(
-					new RegularForwardNode(initialWorldState, new ForwardNodeExpander(availableActions)),
-					new GoalForwardNode(goal),
-					new GoalNodeComparer()
+					ForwardNode.MakeRegularNode(initialWorldState, new ForwardNodeExpander(availableActions)),
+					ForwardNode.MakeGoalNode(goal)
 	           	);
 
+				// FIXME: Downcasting to ForwardEdge - may be fixed by adding another generic parameter to IPathfinder.
 				return new Plan(from edge in path.Edges select ((ForwardEdge)edge).Action.Name);
 			}
 			catch(PathNotFoundException e)
@@ -78,40 +80,12 @@ namespace ProtoGOAP.Planning
 
 		private static double PathfindingHeuristic(ForwardNode sourceNode, ForwardNode targetNode)
 		{
-			// TODO: Ugh... Replace this blasphemous downcasting with an ortodox Visitor pattern.
-			DebugUtils.Assert(sourceNode is RegularForwardNode, "sourceNode must be an instance of {1}", typeof(RegularForwardNode));
-			DebugUtils.Assert(targetNode is GoalForwardNode, "targetNode must be an instance of {0}", typeof(GoalForwardNode));
+			DebugUtils.Assert(!sourceNode.IsGoal, "sourceNode must be a regular (non-goal) {1}", typeof(ForwardNode));
+			DebugUtils.Assert(targetNode.IsGoal, "targetNode must be a goal {0}", typeof(ForwardNode));
 
-			var currentNode = (RegularForwardNode)sourceNode;
-			var goalNode = (GoalForwardNode)targetNode;
-
-			// Can this really be used as a heuristic for forward planning????
-			return goalNode.Goal.GetDistanceFrom(currentNode.WorldState);
-		}
-
-		private class GoalNodeComparer : IEqualityComparer<ForwardNode>
-		{
-			#region IEqualityComparer implementation
-
-			public bool Equals(ForwardNode x, ForwardNode y)
-			{
-				// FIXME: Downcasting!
-				DebugUtils.Assert(x is RegularForwardNode, "{0}.Equals() must be invoked with a regular node as the 1st argument", this.GetType());
-				DebugUtils.Assert(y is GoalForwardNode, "{0}.Equals() must be invoked with the goal node as the 2nd argument", this.GetType());
-
-				return ((GoalForwardNode)y).Goal.IsReachedIn(((RegularForwardNode)x).WorldState);
-			}
-
-			public int GetHashCode(ForwardNode obj)
-			{
-				return (obj is GoalForwardNode)
-					? -1
-					: ((RegularForwardNode)obj).WorldState.GetHashCode();
-			}
-
-			#endregion
-
-
+			// TODO: This heuristic is not particularly effective.
+			// See if a better heuristic for forward planning can be found.
+			return targetNode.Goal.GetDistanceFrom(sourceNode.WorldState);
 		}
 	}
 }

@@ -68,6 +68,7 @@ namespace ProtoGOAP.Planning
 
 		public bool Equals(WorldState other)
 		{
+			// TODO: Maybe simply compare hashCodes? (Make sure that GetHashCode() is implemented properly first.)
 			return (this.symbols == null && other.symbols == null)
 				|| (this.symbols.Count == other.symbols.Count && !this.symbols.Except(other.symbols).Any());
 		}

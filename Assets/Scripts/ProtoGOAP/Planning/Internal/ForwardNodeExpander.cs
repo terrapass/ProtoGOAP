@@ -6,9 +6,9 @@ using Terrapass.Debug;
 
 using ProtoGOAP.Graphs;
 
-namespace ProtoGOAP.Planning
+namespace ProtoGOAP.Planning.Internal
 {
-	public class ForwardNodeExpander : INodeExpander<ForwardNode>
+	internal class ForwardNodeExpander : INodeExpander<ForwardNode>
 	{
 		private readonly IEnumerable<PlanningAction> availableActions;
 
@@ -21,15 +21,21 @@ namespace ProtoGOAP.Planning
 		#region INodeExpander implementation
 		public IEnumerable<IGraphEdge<ForwardNode>> ExpandNode(ForwardNode node)
 		{
-			DebugUtils.Assert(node is RegularForwardNode, "node must be an instance of {0}", typeof(RegularForwardNode));
-			var regularNode = (RegularForwardNode)node;
+			if(node.IsGoal)
+			{
+				throw new ArgumentException(
+					string.Format("Goal {0} cannot be expanded", node.GetType()),
+					"node"
+				);
+			}
+
 			return (from action in availableActions 
-					where action.IsAvailableIn(regularNode.WorldState) 
+					where action.IsAvailableIn(node.WorldState) 
 				select new ForwardEdge(
 					action,
 					node,
-					new RegularForwardNode(
-						action.Apply(regularNode.WorldState),
+					ForwardNode.MakeRegularNode(
+						action.Apply(node.WorldState),
 						this
 					)
 				)).Cast<IGraphEdge<ForwardNode>>();

@@ -5,9 +5,9 @@ using Terrapass.Debug;
 
 using ProtoGOAP.Graphs;
 
-namespace ProtoGOAP.Planning
+namespace ProtoGOAP.Planning.Internal
 {
-	public class ForwardEdge : IGraphEdge<ForwardNode>
+	internal class ForwardEdge : IGraphEdge<ForwardNode>
 	{
 		public PlanningAction Action { get; }
 
