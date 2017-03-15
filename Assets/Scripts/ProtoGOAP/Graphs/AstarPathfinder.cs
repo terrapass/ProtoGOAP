@@ -1,6 +1,9 @@
 ﻿using System;
 using System.Linq;
 using System.Collections.Generic;
+
+using Terrapass.Time;
+
 using ProtoGOAP.Utils.Collections;
 
 namespace ProtoGOAP.Graphs
@@ -10,14 +13,13 @@ namespace ProtoGOAP.Graphs
 	/// </summary>
 	public class AstarPathfinder<GraphNode> : IPathfinder<GraphNode> where GraphNode : IGraphNode<GraphNode>
 	{
-		public const int UNLIMITED_SEARCH_DEPTH = -1;
-
 		/// <summary>
 		/// Partial path with estimated cost, comparable by estimated cost.
 		/// </summary>
 		private class PartialPath : IComparable<PartialPath>
 		{
 			private IList<IGraphEdge<GraphNode>> edges;
+			//private double? costSoFar;
 
 			public double EstimatedTotalCost { get; private set; }
 
@@ -25,12 +27,14 @@ namespace ProtoGOAP.Graphs
 			{
 				this.edges = new List<IGraphEdge<GraphNode>>();
 				this.EstimatedTotalCost = estimatedTotalCost;
+				//this.costSoFar = null;
 			}
 
 			public PartialPath(PartialPath other)
 			{
 				this.edges = new List<IGraphEdge<GraphNode>>(other.edges);
 				this.EstimatedTotalCost = other.EstimatedTotalCost;
+				//this.costSoFar = other.costSoFar;
 			}
 
 			public bool IsEmpty
@@ -63,9 +67,14 @@ namespace ProtoGOAP.Graphs
 				}
 			}
 
-			private double CostSoFar
+			public double CostSoFar
 			{
 				get {
+//					if(this.costSoFar == null || !this.costSoFar.HasValue)
+//					{
+//						this.costSoFar = new Nullable<double>(this.edges.Sum(edge => edge.Cost));
+//					}
+//					return this.costSoFar.Value;
 					return this.edges.Sum(edge => edge.Cost);
 				}
 			}
@@ -73,10 +82,11 @@ namespace ProtoGOAP.Graphs
 			public void AppendEdge(IGraphEdge<GraphNode> edge, double estimatedRemainingCost)
 			{
 				this.edges.Add(edge);
+				//this.costSoFar = null;
 				this.EstimatedTotalCost = this.CostSoFar + edge.Cost + estimatedRemainingCost;
 			}
 
-			public Path<GraphNode> toPath()
+			public Path<GraphNode> ToPath()
 			{
 				return new Path<GraphNode>(this.edges);
 			}
@@ -93,6 +103,8 @@ namespace ProtoGOAP.Graphs
 
 		private readonly PathCostHeuristic<GraphNode> heuristic;
 		private readonly int maxSearchDepth;
+		private readonly float maxSecondsPerSearch;
+		//private readonly bool assumeNonNegativeCosts;
 
 		public AstarPathfinder(AstarPathfinderConfiguration<GraphNode> configuration = null)
 		{
@@ -104,6 +116,8 @@ namespace ProtoGOAP.Graphs
 
 			this.heuristic = configuration.Heuristic;
 			this.maxSearchDepth = configuration.MaxSearchDepth;
+			this.maxSecondsPerSearch = configuration.MaxSecondsPerSearch;
+			//this.assumeNonNegativeCosts = configuration.AssumeNonNegativeCosts;
 		}
 
 		/// <summary>
@@ -114,8 +128,10 @@ namespace ProtoGOAP.Graphs
 		/// Maximum depth for search, i.e. maximum number of edges, allowed in a path.
 		/// A negative value indicates no depth limit.
 		/// </param>
-		public AstarPathfinder(PathCostHeuristic<GraphNode> heuristic, int maxSearchDepth = UNLIMITED_SEARCH_DEPTH)
-			: this(new AstarPathfinderConfiguration<GraphNode>.Builder()
+		public AstarPathfinder(
+			PathCostHeuristic<GraphNode> heuristic, 
+			int maxSearchDepth = AstarPathfinderConfiguration<GraphNode>.UNLIMITED_SEARCH_DEPTH
+		) : this(new AstarPathfinderConfiguration<GraphNode>.Builder()
 				.UseHeuristic(heuristic)
 				.LimitSearchDepth(maxSearchDepth)
 				.Build())
@@ -132,11 +148,21 @@ namespace ProtoGOAP.Graphs
 			IEqualityComparer<GraphNode> nodeEqualityComparer
 		)
 		{
+			// If there is a limit on search time, we need to initialize the timer
+			var timer = new SystemExecutionTimer();
+
 			// Set of already visited nodes
 			var closed = new HashSet<GraphNode>(nodeEqualityComparer);
 			// Priority queue of partial and potentially complete paths
 			var open = new ListBasedPriorityQueue<PartialPath>();
 			open.Add(new PartialPath(this.heuristic(sourceNode, targetNode)));
+
+			// Best known path to target in the open priority queue
+			// (Used as a fallback, if time limit is exceeded before the search ends)
+			PartialPath bestPathToTarget = null;
+			// Cost of the cheapest known path to target
+			// (Used to discard costlier paths, if the assumption of non-negative edge costs is in effect)
+//			double minTotalCost = double.PositiveInfinity;
 
 			// While there are unexplored nodes
 			while(open.Count > 0)
@@ -173,7 +199,23 @@ namespace ProtoGOAP.Graphs
 				if(targetEqualityComparer.Equals(currentNode, targetNode))
 				{
 					// Hurray!
-					return currentPartialPath.toPath();
+					return currentPartialPath.ToPath();
+				}
+
+				// If there is a time limit, check the timer.
+				// If the time limit has been exceeded, return the best known path to target or,
+				// if there has been no such path discovered, break and report a failure.
+				if(this.maxSecondsPerSearch < float.PositiveInfinity && timer.ElapsedSeconds > this.maxSecondsPerSearch)
+				{
+					if(bestPathToTarget != null)
+					{
+						// "Good enough"
+						return bestPathToTarget.ToPath();
+					}
+					else
+					{
+						break;
+					}
 				}
 
 				// If we have a limit on max search depth, and current path is at max depth limit, 
@@ -186,6 +228,23 @@ namespace ProtoGOAP.Graphs
 					continue;
 				}
 
+				// FIXME: Remove the commented out code.
+				// The following check makes no sense: priority queue already guarantees that
+				// the current path is at most as expensive as the best known path to target.
+				// Maybe if it checked for >=, instead of >, i.e. assumed positive and not merely non-negative costs,
+				// it would have miniscule effect, but even so the benefits would likely be negligible.
+
+				// If the assumption of non-negative costs is in effect, we can discard the current path
+				// from further consideration, if it's already costlier than the cheapest known path 
+				// that reaches the target node, because if all the edges have non-negative cost,
+				// we can be certain that it will not get any cheaper.
+				// (At this point we know that the current path does not reach the target,
+				// otherwise we would've already returned it earlier in this loop iteration.)
+//				if(this.assumeNonNegativeCosts && currentPartialPath.CostSoFar > minTotalCost)
+//				{
+//					continue;
+//				}
+
 				// Mark currentNode as visited by placing it into closed set.
 				closed.Add(currentNode);
 				// Insert paths from sourceNode to currentNode's neighbours into the open priority queue
@@ -195,6 +254,29 @@ namespace ProtoGOAP.Graphs
 					var pathToNeighbour = new PartialPath(currentPartialPath);
 					pathToNeighbour.AppendEdge(outgoingEdge, this.heuristic(neighbour, targetNode));
 					open.Add(pathToNeighbour);
+
+					// If there is a time limit, check if the neighbour is the target node
+					// and update bestPathToTarget, if needed.
+					// This allows us to keep track of the best path to target, found so far.
+					if(this.maxSecondsPerSearch < float.PositiveInfinity 
+						&& targetEqualityComparer.Equals(neighbour, targetNode)
+						// Theoretically, EstimatedTotalCost could be used here, instead of CostSoFar,
+						// since heuristic SHOULD return 0 for target node.
+						// However, this behaviour is not enforced, and so CostSoFar is used for reliability.
+						&& (bestPathToTarget == null || pathToNeighbour.CostSoFar < bestPathToTarget.CostSoFar))
+					{
+						bestPathToTarget = pathToNeighbour;
+					}
+
+					// If the assumption of non-negative costs is in effect, check if the neighbour
+					// is the target node and update minTotalCost, if needed.
+//					if(this.assumeNonNegativeCosts && targetEqualityComparer.Equals(neighbour, targetNode))
+//					{
+//						// Theoretically, EstimatedTotalCost could be used here, instead of CostSoFar,
+//						// since heuristic SHOULD return 0 for target node.
+//						// However, this behaviour is not enforced, and so CostSoFar is used for reliability.
+//						minTotalCost = Math.Min(minTotalCost, pathToNeighbour.CostSoFar);
+//					}
 				}
 			}
 

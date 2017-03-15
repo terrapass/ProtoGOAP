@@ -28,6 +28,9 @@ namespace ProtoGOAP.Planning
 				new AstarPathfinderConfiguration<ForwardNode>.Builder()
 					.UseHeuristic(PathfindingHeuristic)
 					.LimitSearchDepth(maxPlanLength)
+					.LimitSearchTime(0.35)
+					//.LimitSearchTime(1)
+					//.AssumeNonNegativeCosts()
 					.Build()
 			);
 		}
