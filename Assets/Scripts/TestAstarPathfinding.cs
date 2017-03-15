@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -145,10 +146,7 @@ public class TestAstarPathfinding : MonoBehaviour
 		var timer = new SystemExecutionTimer();
 		var path = pathfinder.FindPath(a, f);
 		print(string.Format("In {1} seconds found the following path with cost {0} from A to F:", path.Cost, timer.ElapsedSeconds));
-		foreach(var edge in path.Edges)
-		{
-			print(edge);
-		}
+		print(path.Edges.Aggregate("", (soFar, edge) => soFar + (soFar.Length > 0 ? " -> " : "") + edge.ToString()));
 	}
 	
 	// Update is called once per frame
