@@ -6,6 +6,7 @@ namespace ProtoGOAP.Planning.Effects
 	public interface IEffect
 	{
 		WorldState ApplyTo(WorldState initialState);
+		//WorldState UnapplyTo(WorldState initialState);
 
 		// This property is really a bit of a crutch.
 		// It works around the problem, where effects
@@ -16,7 +17,11 @@ namespace ProtoGOAP.Planning.Effects
 		// whose another implementation would serve as a proxy, dispatching
 		// symbol lookups to IKnowledgeProvider, if a corresponding symbol is
 		// not yet present in the world state?
-		IEnumerable<SymbolId> RelevantSymbols {get;}
+		//IEnumerable<SymbolId> RelevantSymbols {get;}
+
+		SymbolId SymbolId { get; }
+		int? ValueAssigned { get; }
+		int? ValueDelta { get; }
 	}
 }
 

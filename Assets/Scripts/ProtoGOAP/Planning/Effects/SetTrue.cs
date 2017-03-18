@@ -11,6 +11,13 @@ namespace ProtoGOAP.Planning.Effects
 		{
 			
 		}
+
+		public override int? ValueAssigned
+		{
+			get {
+				return 1;
+			}
+		}
 	}
 }
 

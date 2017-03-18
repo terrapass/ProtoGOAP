@@ -13,15 +13,15 @@ public class TestForwardPlanning : MonoBehaviour
 	void Start()
 	{
 		var currentWorldState = new WorldState.Builder()
-			.SetSymbol(new SymbolId("Wood"), 10)
+			.SetSymbol(new SymbolId("Wood"), 0)
 			.SetSymbol(new SymbolId("Stone"), 8)
 			.SetSymbol(new SymbolId("Iron"), 0)
 			.SetSymbol(new SymbolId("HouseBuilt"), 0)
-			.SetSymbol(new SymbolId("WoodInStorage"), 15)
+			.SetSymbol(new SymbolId("WoodInStorage"), 5)
 			.SetSymbol(new SymbolId("StoneInStorage"), 0)
 			.SetSymbol(new SymbolId("IronInStorage"), 0)
 			.SetSymbol(new SymbolId("HasAxe"), 0)
-			.SetSymbol(new SymbolId("AxesAvailable"), 1)
+			.SetSymbol(new SymbolId("AxesAvailable"), 10)
 			.Build();
 
 		var availableActions = new List<PlanningAction>() {
@@ -77,7 +77,8 @@ public class TestForwardPlanning : MonoBehaviour
 					new IsTrue(new SymbolId("HasAxe"))
 				},
 				new List<IEffect>() {
-					new Add(new SymbolId("Wood"), 8)
+					new Add(new SymbolId("Wood"), 8)//,
+					//new SetFalse(new SymbolId("HasAxe"))
 				},
 				5
 			),
@@ -124,18 +125,20 @@ public class TestForwardPlanning : MonoBehaviour
 			var plan = planner.FormulatePlan(currentWorldState, availableActions, buildHouseGoal);
 			print(
 				string.Format(
-					"{0} has found a plan of length {1} to satisfy \"{2}\" in {3} seconds",
+					"{0} has found a plan of length {1} and cost {2} to satisfy \"{3}\" in {4} seconds",
 					planner.GetType(), 
-					plan.ActionNames.Count(),
+					plan.Length,
+					plan.Cost,
 					buildHouseGoal.Name,
 					timer.ElapsedSeconds
 				)
 			);
 			print(plan.ToString());
+			TestUtils.ValidatePlan(plan, currentWorldState, buildHouseGoal);
 		}
 		catch(PlanNotFoundException e)
 		{
-			print(e.Message);
+			Debug.LogWarningFormat("{0}: {1}", e.Message, e.InnerException.Message);
 		}
 	}
 }

@@ -4,13 +4,19 @@ using ProtoGOAP.Planning;
 
 namespace ProtoGOAP.Planning.Preconditions
 {
-	public sealed class IsTrue : SingleSymbolPrecondition
+	public sealed class IsTrue : IsInRange
 	{
 		public IsTrue(SymbolId symbolId)
-			: base(symbolId, (value) => value != 0, (value) => (value != 0) ? 0.0 : 1.0)
+			//: base(symbolId, (value) => value != 0, (value) => (value != 0) ? 0.0 : 1.0)
+			: base(symbolId, ValueRange.Exactly(1))
 		{
 			
 		}
+
+//		public override string ToString()
+//		{
+//			return string.Format("({0})", SymbolId);
+//		}
 
 //		public bool IsSatisfiedBy(WorldState worldState)
 //		{
