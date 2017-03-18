@@ -214,7 +214,7 @@ namespace ProtoGOAP.Graphs
 					}
 					else
 					{
-						break;
+						throw new PathfindingTimeoutException(this.GetType(), this.maxSecondsPerSearch);
 					}
 				}
 
@@ -281,7 +281,12 @@ namespace ProtoGOAP.Graphs
 			}
 
 			// Found no path to targetNode
-			throw new PathNotFoundException("Failed to find a path using A*");
+			throw new NoPathExistsException(
+				this.GetType(), 
+				this.maxSearchDepth != AstarPathfinderConfiguration<GraphNode>.UNLIMITED_SEARCH_DEPTH
+					? (int?)this.maxSearchDepth
+					: (int?)null
+			);
 
 		}
 		#endregion
