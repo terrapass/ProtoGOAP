@@ -6,7 +6,7 @@ using Terrapass.Debug;
 
 namespace ProtoGOAP.Planning
 {
-	public struct WorldState : IKnowledgeProvider, IEquatable<WorldState>
+	public struct WorldState : IKnowledgeProvider, IEquatable<WorldState>, IEnumerable<KeyValuePair<SymbolId, int>>
 	{
 		private readonly IDictionary<SymbolId, int> symbols;
 
@@ -60,6 +60,24 @@ namespace ProtoGOAP.Planning
 		public int GetSymbolValue(SymbolId symbolId)
 		{
 			return this[symbolId];
+		}
+
+		#endregion
+
+		#region IEnumerable implementation
+
+		public IEnumerator<KeyValuePair<SymbolId, int>> GetEnumerator()
+		{
+			return this.symbols.GetEnumerator();
+		}
+
+		#endregion
+
+		#region IEnumerable implementation
+
+		System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator()
+		{
+			throw new NotImplementedException();
 		}
 
 		#endregion
