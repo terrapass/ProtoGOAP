@@ -14,14 +14,14 @@ public class TestForwardPlanning : MonoBehaviour
 	{
 		var currentWorldState = new WorldState.Builder()
 			.SetSymbol(new SymbolId("Wood"), 0)
-			.SetSymbol(new SymbolId("Stone"), 8)
+			.SetSymbol(new SymbolId("Stone"), 2)
 			.SetSymbol(new SymbolId("Iron"), 0)
 			.SetSymbol(new SymbolId("HouseBuilt"), 0)
 			.SetSymbol(new SymbolId("WoodInStorage"), 5)
-			.SetSymbol(new SymbolId("StoneInStorage"), 0)
+			.SetSymbol(new SymbolId("StoneInStorage"), 3)
 			.SetSymbol(new SymbolId("IronInStorage"), 0)
 			.SetSymbol(new SymbolId("HasAxe"), 0)
-			.SetSymbol(new SymbolId("AxesAvailable"), 10)
+			.SetSymbol(new SymbolId("AxesAvailable"), 1)
 			.Build();
 
 		var availableActions = new List<PlanningAction>() {
@@ -117,7 +117,7 @@ public class TestForwardPlanning : MonoBehaviour
 			}
        	);
 
-		var planner = new ForwardPlanner(8);
+		var planner = new ForwardPlanner();
 
 		try
 		{
