@@ -23,7 +23,7 @@ public class TestRegressivePlanning : MonoBehaviour
 			.SetSymbol(new SymbolId("HasAxe"), 0)
 			.SetSymbol(new SymbolId("HasPickaxe"), 0) 
 			.SetSymbol(new SymbolId("AxesAvailable"), 0)
-			.SetSymbol(new SymbolId("PickaxesAvailable"), 1)
+			.SetSymbol(new SymbolId("PickaxesAvailable"), 0)
 			.Build();
 
 		var availableActions = new List<PlanningAction>() {
@@ -165,7 +165,7 @@ public class TestRegressivePlanning : MonoBehaviour
 			}
        	);
 
-		var planner = new RegressivePlanner(10);
+		var planner = new RegressivePlanner(20);
 
 		try
 		{
