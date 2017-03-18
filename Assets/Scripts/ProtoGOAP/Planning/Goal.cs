@@ -21,6 +21,13 @@ namespace ProtoGOAP.Planning
 		// TODO: Replace with a composite (will also solve code duplication between Goal and Action).
 		private readonly IEnumerable<IPrecondition> preconditions;
 
+		public IEnumerable<IPrecondition> Preconditions
+		{
+			get {
+				return this.preconditions;
+			}
+		}
+
 		public Goal(string name, IEnumerable<IPrecondition> preconditions)
 		{
 			this.Name = PreconditionUtils.EnsureNotBlank(name, "name");
@@ -37,7 +44,7 @@ namespace ProtoGOAP.Planning
 		public IEnumerable<SymbolId> PreconditionSymbols
 		{
 			get {
-				return preconditions.Aggregate(new List<SymbolId>(), (soFar, precondition) => {soFar.AddRange(precondition.RelevantSymbols);return soFar;});
+				return preconditions.Select((precond) => precond.SymbolId);
 			}
 		}
 

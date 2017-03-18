@@ -42,6 +42,20 @@ namespace ProtoGOAP.Planning
 			this.Cost = cost;
 		}
 
+		public IEnumerable<IPrecondition> Preconditions
+		{
+			get {
+				return this.preconditions;
+			}
+		}
+
+		public IEnumerable<IEffect> Effects
+		{
+			get {
+				return this.effects;
+			}
+		}
+
 		public bool IsAvailableIn(WorldState worldState)
 		{
 			// Equivalent to AND
@@ -52,7 +66,7 @@ namespace ProtoGOAP.Planning
 		public IEnumerable<SymbolId> PreconditionSymbols
 		{
 			get {
-				return preconditions.Aggregate(new List<SymbolId>(), (soFar, precondition) => {soFar.AddRange(precondition.RelevantSymbols); return soFar;});
+				return preconditions.Select((precond) => precond.SymbolId);
 			}
 		}
 
@@ -60,7 +74,7 @@ namespace ProtoGOAP.Planning
 		public IEnumerable<SymbolId> AffectedSymbols
 		{
 			get {
-				return effects.Aggregate(new List<SymbolId>(), (soFar, effect) => {soFar.AddRange(effect.RelevantSymbols); return soFar;});
+				return effects.Select((effect) => effect.SymbolId);
 			}
 		}
 
