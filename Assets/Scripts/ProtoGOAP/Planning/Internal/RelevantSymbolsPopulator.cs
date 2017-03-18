@@ -6,7 +6,7 @@ using Terrapass.Debug;
 
 namespace ProtoGOAP.Planning.Internal
 {
-	public class RelevantSymbolsPopulator : IWorldStatePopulator
+	internal class RelevantSymbolsPopulator : IWorldStatePopulator
 	{
 		private readonly IEnumerable<SymbolId> relevantSymbols;
 
