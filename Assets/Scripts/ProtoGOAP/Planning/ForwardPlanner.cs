@@ -59,7 +59,7 @@ namespace ProtoGOAP.Planning
 	           	);
 
 				// FIXME: Downcasting to ForwardEdge - may be fixed by adding another generic parameter to IPathfinder.
-				return new Plan(from edge in path.Edges select ((ForwardEdge)edge).Action.Name);
+				return new Plan(from edge in path.Edges select ((ForwardEdge)edge).Action);
 			}
 			catch(PathNotFoundException e)
 			{

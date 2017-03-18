@@ -8,27 +8,34 @@ namespace ProtoGOAP.Planning
 {
 	public struct Plan
 	{
-		public IEnumerable<string> ActionNames { get; }	// no need to store actual Action instances
+		public IEnumerable<PlanningAction> Actions { get; }
 		// TODO: This should actually be an ordered collection of action ids,
 		//public IEnumerable<ActionId> ActionIds {get;}
 
 		public int Length
 		{
 			get {
-				return ActionNames.Count();
+				return Actions.Count();
 			}
 		}
 
-		public Plan(IEnumerable<string> actionNames)
+		public double Cost
 		{
-			this.ActionNames = new List<string>(PreconditionUtils.EnsureNotNull(actionNames, "actionNames")).AsReadOnly();
+			get {
+				return Actions.Sum((action) => action.Cost);
+			}
+		}
+
+		public Plan(IEnumerable<PlanningAction> actions)
+		{
+			this.Actions = new List<PlanningAction>(PreconditionUtils.EnsureNotNull(actions, "actions")).AsReadOnly();
 		}
 
 		public override string ToString()
 		{
 			string result = "";
 			bool first = true;
-			foreach(string actionName in this.ActionNames)
+			foreach(string actionName in this.Actions.Select((action) => action.Name))
 			{
 				if(!first)
 				{
