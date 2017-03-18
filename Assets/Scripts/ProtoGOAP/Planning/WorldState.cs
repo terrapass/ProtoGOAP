@@ -109,7 +109,19 @@ namespace ProtoGOAP.Planning
 		{
 			unchecked
 			{
-				return (symbols != null ? symbols.GetHashCode() : 0);
+				// 0 for no symbols
+				if(symbols == null)
+				{
+					return 0;
+				}
+
+				// Order is not important.
+				int hash = 0;
+				foreach(var kvp in symbols)
+				{
+					hash += 17 * kvp.Key.GetHashCode() + 23 * kvp.Value.GetHashCode();
+				}
+				return hash;
 			}
 		}
 
