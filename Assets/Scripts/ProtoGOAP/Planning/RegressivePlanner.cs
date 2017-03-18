@@ -62,22 +62,22 @@ namespace ProtoGOAP.Planning
 					RegressiveNode.MakeTarget(initialWorldState)
 				);
 
-				UnityEngine.Debug.Log("Regressive path:");
-				for(int i = 0; i < path.Edges.Count(); i++)
-				{
-					if(i == 0)
-					{
-						UnityEngine.Debug.LogFormat("Initial: {0}", path.Edges.ElementAt(i).SourceNode);
-					}
-					UnityEngine.Debug.LogFormat("After {0}: {1}", ((RegressiveEdge)path.Edges.ElementAt(i)).Action.Name, path.Edges.ElementAt(i).TargetNode);
+//				UnityEngine.Debug.Log("Regressive path:");
+//				for(int i = 0; i < path.Edges.Count(); i++)
+//				{
+//					if(i == 0)
+//					{
+//						UnityEngine.Debug.LogFormat("Initial: {0}", path.Edges.ElementAt(i).SourceNode);
+//					}
+//					UnityEngine.Debug.LogFormat("After {0}: {1}", ((RegressiveEdge)path.Edges.ElementAt(i)).Action.Name, path.Edges.ElementAt(i).TargetNode);
+//
+//					if(i > 0)
+//					{
+//						DebugUtils.Assert(path.Edges.ElementAt(i - 1).TargetNode == path.Edges.ElementAt(i).SourceNode, "path must be consistent");
+//					}
+//				}
 
-					if(i > 0)
-					{
-						DebugUtils.Assert(path.Edges.ElementAt(i - 1).TargetNode == path.Edges.ElementAt(i).SourceNode, "path must be consistent");
-					}
-				}
-
-				// FIXME: Downcasting to Regressive - may be fixed by adding another generic parameter to IPathfinder.
+				// FIXME: Downcasting to RegressiveNode - may be fixed by adding another generic parameter to IPathfinder.
 				//return new Plan(SortActions(from edge in path.Edges.Reverse() select ((RegressiveEdge)edge).Action, initialWorldState));
 				return new Plan(from edge in path.Edges.Reverse() select ((RegressiveEdge)edge).Action);
 			}

@@ -117,6 +117,31 @@ namespace ProtoGOAP.Planning.Preconditions
 
 		#endregion
 
+		public override bool Equals(object obj)
+		{
+			if(obj == null)
+				return false;
+			if(ReferenceEquals(this, obj))
+				return true;
+			if(obj.GetType() != typeof(ValueRange))
+				return false;
+			ValueRange other = (ValueRange)obj;
+			return this.Equals(other);
+		}
+		
+
+		public override int GetHashCode()
+		{
+			unchecked
+			{
+				int hash = 23;
+				hash = hash * 37 + MinValue.GetHashCode();
+				hash = hash * 37 + MaxValue.GetHashCode();
+				return hash;
+			}
+		}
+		
+
 		public override string ToString()
 		{
 			return this.IsEmpty

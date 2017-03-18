@@ -138,9 +138,32 @@ namespace ProtoGOAP.Planning.Internal
 
 		#endregion
 
+		public override bool Equals(object obj)
+		{
+			if(obj == null)
+				return false;
+			if(ReferenceEquals(this, obj))
+				return true;
+			if(obj.GetType() != typeof(RegressiveNode))
+				return false;
+			RegressiveNode other = (RegressiveNode)obj;
+			return this.Equals(other);
+		}
+		
+
+		public override int GetHashCode()
+		{
+			unchecked
+			{
+				return this.CurrentConstraints.GetHashCode();
+			}
+		}
+		
+
 		public override string ToString()
 		{
-			return string.Format("[RegressiveNode: currentConstraints={0}, initialState={1}, IsTarget={2}]", currentConstraints, initialState, IsTarget);
+			//return string.Format("[RegressiveNode: currentConstraints={0}, initialState={1}, IsTarget={2}]", currentConstraints, initialState, IsTarget);
+			return string.Format("{0}", currentConstraints);
 		}				
 	}
 }

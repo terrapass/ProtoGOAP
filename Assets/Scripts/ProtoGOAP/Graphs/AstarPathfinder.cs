@@ -1,7 +1,10 @@
-﻿using System;
+﻿// Uncomment to make AstarPathfinder make tests for correctness of GraphNode.GetHashCode()
+//#define ASTAR_VALIDATE_NODE_HASH_IMPLEMENTATION
+using System;
 using System.Linq;
 using System.Collections.Generic;
 
+using Terrapass.Debug;
 using Terrapass.Time;
 
 using ProtoGOAP.Utils.Collections;
@@ -194,6 +197,8 @@ namespace ProtoGOAP.Graphs
 				{
 					continue;
 				}
+				// Will only be called if ASTAR_VALIDATE_NODE_HASH_IMPLEMENTATION is defined
+				ValidateNodeHashImplementation(closed, currentNode);
 
 				// If the currently examined node is the target
 				if(targetEqualityComparer.Equals(currentNode, targetNode))
@@ -290,6 +295,20 @@ namespace ProtoGOAP.Graphs
 
 		}
 		#endregion
+
+		[System.Diagnostics.Conditional("ASTAR_VALIDATE_NODE_HASH_IMPLEMENTATION")]
+		private static void ValidateNodeHashImplementation(HashSet<GraphNode> closedSet, GraphNode currentNode)
+		{
+			var debugEqualClosed = closedSet.FirstOrDefault((node) => node.Equals(currentNode));
+			DebugUtils.Assert(
+				debugEqualClosed == null,
+				"{0}.GetHashCode() is broken: hashes are different for equal values: ({0}(HASH {1}) == {2}(HASH {3})", 
+				currentNode, 
+				currentNode.GetHashCode(),
+				debugEqualClosed,
+				debugEqualClosed != null ? debugEqualClosed.GetHashCode() : -1
+			);
+		}
 	}
 }
 

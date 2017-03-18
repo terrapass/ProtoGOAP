@@ -79,7 +79,21 @@ namespace ProtoGOAP.Planning.Internal
 		{
 			unchecked
 			{
-				return (ranges != null ? ranges.GetHashCode() : 0);
+				// 0 for no constraints
+				if(ranges == null)
+				{
+					return 0;
+				}
+
+				// Only non-AnyValue constraints contribute to the hash value, order is not important.
+				int hash = 0;
+				foreach(var kvp in ranges)
+				{
+					hash += ValueRange.AnyValue.Equals(kvp.Value)
+						? 0
+						: 17 * kvp.Key.GetHashCode() + 23 * kvp.Value.GetHashCode();
+				}
+				return hash;
 			}
 		}
 
