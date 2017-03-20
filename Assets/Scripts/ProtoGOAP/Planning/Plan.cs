@@ -6,9 +6,10 @@ using Terrapass.Debug;
 
 namespace ProtoGOAP.Planning
 {
-	public struct Plan
+	public sealed class Plan
 	{
 		public IEnumerable<PlanningAction> Actions { get; }
+		public Goal Goal { get; }
 		// TODO: This should actually be an ordered collection of action ids,
 		//public IEnumerable<ActionId> ActionIds {get;}
 
@@ -26,9 +27,10 @@ namespace ProtoGOAP.Planning
 			}
 		}
 
-		public Plan(IEnumerable<PlanningAction> actions)
+		public Plan(IEnumerable<PlanningAction> actions, Goal goal)
 		{
 			this.Actions = new List<PlanningAction>(PreconditionUtils.EnsureNotNull(actions, "actions")).AsReadOnly();
+			this.Goal = PreconditionUtils.EnsureNotNull(goal, "goal");
 		}
 
 		public override string ToString()

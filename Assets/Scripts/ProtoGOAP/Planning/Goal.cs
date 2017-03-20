@@ -13,7 +13,7 @@ namespace ProtoGOAP.Planning
 	// (A* implementation needs to be extended to return the best incomplete path, 
 	// if no full path has been found .
 	// TODO: Goal and Action interfaces look suspiciously similar, consider refactoring.
-	public struct Goal
+	public sealed class Goal
 	{
 		// TODO: Maybe replace with (parametric) GoalId to facilitate actions such as HaveAtLeast(RES_MONEY, 1000).
 		public string Name {get;}

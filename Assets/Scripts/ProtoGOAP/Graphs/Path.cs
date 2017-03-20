@@ -7,7 +7,7 @@ namespace ProtoGOAP.Graphs
 	/// <summary>
 	/// Path between two nodes of an abstract graph.
 	/// </summary>
-	public struct Path<GraphNode> where GraphNode : IGraphNode<GraphNode>
+	public sealed class Path<GraphNode> where GraphNode : IGraphNode<GraphNode>
 	{
 		/// <summary>
 		/// Total path cost, i.e. sum of costs of all of the edges.
