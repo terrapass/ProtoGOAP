@@ -13,11 +13,12 @@ namespace ProtoGOAP.Planning
 	public class ForwardPlanner : IPlanner
 	{
 		public const int DEFAULT_MAX_PLAN_LENGTH = 20;
+		public const float DEFAULT_SEARCH_TIME_SECONDS = 0.5f;
 
 		private readonly int maxPlanLength;
 		private readonly IPathfinder<ForwardNode> pathfinder;
 
-		public ForwardPlanner(int maxPlanLength = DEFAULT_MAX_PLAN_LENGTH)
+		public ForwardPlanner(int maxPlanLength = DEFAULT_MAX_PLAN_LENGTH, float searchTimeSeconds = DEFAULT_SEARCH_TIME_SECONDS)
 		{
 			if(maxPlanLength <= 0)
 			{
@@ -28,9 +29,7 @@ namespace ProtoGOAP.Planning
 				new AstarPathfinderConfiguration<ForwardNode>.Builder()
 					.UseHeuristic(PathfindingHeuristic)
 					.LimitSearchDepth(maxPlanLength)
-					.LimitSearchTime(0.35)
-					//.LimitSearchTime(1)
-					//.AssumeNonNegativeCosts()
+					.LimitSearchTime(searchTimeSeconds)
 					.Build()
 			);
 		}
@@ -59,7 +58,7 @@ namespace ProtoGOAP.Planning
 	           	);
 
 				// FIXME: Downcasting to ForwardEdge - may be fixed by adding another generic parameter to IPathfinder.
-				return new Plan(from edge in path.Edges select ((ForwardEdge)edge).Action);
+				return new Plan(from edge in path.Edges select ((ForwardEdge)edge).Action, goal);
 			}
 			catch(PathNotFoundException e)
 			{

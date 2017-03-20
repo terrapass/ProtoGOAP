@@ -14,11 +14,12 @@ namespace ProtoGOAP.Planning
 	public class RegressivePlanner : IPlanner
 	{
 		public const int DEFAULT_MAX_PLAN_LENGTH = 20;
+		public const float DEFAULT_SEARCH_TIME_SECONDS = 0.5f;
 
 		private readonly int maxPlanLength;
 		private readonly IPathfinder<RegressiveNode> pathfinder;
 
-		public RegressivePlanner(int maxPlanLength = DEFAULT_MAX_PLAN_LENGTH)
+		public RegressivePlanner(int maxPlanLength = DEFAULT_MAX_PLAN_LENGTH, float searchTimeSeconds = DEFAULT_SEARCH_TIME_SECONDS)
 		{
 			if(maxPlanLength <= 0)
 			{
@@ -29,7 +30,7 @@ namespace ProtoGOAP.Planning
 				new AstarPathfinderConfiguration<RegressiveNode>.Builder()
 					.UseHeuristic(PathfindingHeuristic)
 					.LimitSearchDepth(maxPlanLength)
-					.LimitSearchTime(1)
+					.LimitSearchTime(searchTimeSeconds)
 					.Build()
 			);
 		}
@@ -79,7 +80,7 @@ namespace ProtoGOAP.Planning
 
 				// FIXME: Downcasting to RegressiveNode - may be fixed by adding another generic parameter to IPathfinder.
 				//return new Plan(SortActions(from edge in path.Edges.Reverse() select ((RegressiveEdge)edge).Action, initialWorldState));
-				return new Plan(from edge in path.Edges.Reverse() select ((RegressiveEdge)edge).Action);
+				return new Plan(from edge in path.Edges.Reverse() select ((RegressiveEdge)edge).Action, goal);
 			}
 			catch(PathNotFoundException e)
 			{
