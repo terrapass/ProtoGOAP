@@ -81,6 +81,7 @@ namespace ProtoGOAP.Agents
 				{						
 					env.PlanExecutor.SubmitForExecution(this.GetPlanFor(goal));
 					this.currentGoal = goal;
+					planSubmitted = true;
 					break;
 				}
 				catch(PlanNotFoundException)
