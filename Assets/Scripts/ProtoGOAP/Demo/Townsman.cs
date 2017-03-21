@@ -157,6 +157,24 @@ namespace ProtoGOAP.Demo
 			}
 		}
 
+		private GameObject FindClosestTree()
+		{
+			return DemoUtils.FindClosestWithTag(transform.position, "src_tree");
+		}
+
+		private void MoveTo(Vector3 position)
+		{
+			//this.navMeshAgent.ResetPath();
+			this.navMeshAgent.destination = position;
+		}
+
+		private bool ReachedDestination
+		{
+			get {
+				return !this.navMeshAgent.pathPending && this.navMeshAgent.remainingDistance < 0.0001f;
+			}
+		}
+
 		public ToolType CurrentTool
 		{
 			get {

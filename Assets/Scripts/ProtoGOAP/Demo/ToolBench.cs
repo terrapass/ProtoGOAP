@@ -1,10 +1,19 @@
 ﻿using UnityEngine;
 using System;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace ProtoGOAP.Demo
 {
 	public class ToolBench : MonoBehaviour
 	{
+		[Serializable]
+		private struct StackViewPair
+		{
+			public ToolType toolType;
+			public StackView stackView;
+		}
+
 		[SerializeField]
 		private int axes;
 		[SerializeField]
@@ -13,6 +22,39 @@ namespace ProtoGOAP.Demo
 		private int hammers;
 		[SerializeField]
 		private int saws;
+
+		[SerializeField]
+		private Town town;
+		[SerializeField]
+		private StackViewPair[] stackViewPairs;
+
+		private IDictionary<ToolType, StackView> stackViews;
+
+		void Start()
+		{
+			this.stackViews = new Dictionary<ToolType, StackView>();
+			foreach(var pair in stackViewPairs)
+			{
+				pair.stackView.SingleViewPrefab = town.ToolPrefabs[pair.toolType];
+				this.stackViews.Add(pair.toolType, pair.stackView);
+			}
+		}
+
+		void Update()
+		{
+			SafeUpdateStack(ToolType.Axe, axes);
+			SafeUpdateStack(ToolType.Pickaxe, pickaxes);
+			SafeUpdateStack(ToolType.Hammer, hammers);
+			SafeUpdateStack(ToolType.Saw, saws);
+		}
+
+		private void SafeUpdateStack(ToolType toolType, int count)
+		{
+			if(stackViews.ContainsKey(toolType))
+			{
+				stackViews[toolType].Count = count;
+			}
+		}
 
 		public int GetToolCount(ToolType toolType)
 		{

@@ -15,6 +15,8 @@ namespace ProtoGOAP.Demo
 		private GameObject constructionSitePrefab;
 		[SerializeField]
 		private GameObject housePrefab;
+		[SerializeField]
+		private Transform builderPosition;
 
 		private GameObject constructionSite;
 		private GameObject house;
@@ -40,6 +42,16 @@ namespace ProtoGOAP.Demo
 			}
 			set {
 				isBuilt = value;
+			}
+		}
+
+		public Transform BuilderPosition
+		{
+			get {
+				return this.builderPosition;
+			}
+			set {
+				builderPosition = value;
 			}
 		}
 	}

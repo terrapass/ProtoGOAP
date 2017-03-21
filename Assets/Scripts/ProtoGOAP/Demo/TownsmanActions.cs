@@ -296,11 +296,7 @@ namespace ProtoGOAP.Demo
 					throw new InvalidOperationException("not enough resources");
 				}
 
-				this.subject.town.ConstructionStorage.Planks -= PLANKS_REQUIRED;
-				this.subject.town.ConstructionStorage.Iron -= IRON_REQUIRED;
-
-				subject.AnimateTool = true;
-				timer.Resume();
+				subject.MoveTo(subject.town.House.BuilderPosition.position);
 
 				this.Status = ExecutionStatus.InProgress;
 			}
@@ -316,11 +312,22 @@ namespace ProtoGOAP.Demo
 
 			protected override void UpdateImpl()
 			{
-				if(Status == ExecutionStatus.InProgress && timer.ElapsedSeconds > EXECUTION_TIME)
+				if(Status == ExecutionStatus.InProgress)
 				{
-					subject.AnimateTool = false;
-					subject.town.House.IsBuilt = true;
-					this.Status = ExecutionStatus.Complete;
+					if(timer.IsPaused && subject.ReachedDestination)
+					{
+						this.subject.town.ConstructionStorage.Planks -= PLANKS_REQUIRED;
+						this.subject.town.ConstructionStorage.Iron -= IRON_REQUIRED;
+
+						subject.AnimateTool = true;
+						timer.Resume();
+					}
+					else if(!timer.IsPaused && timer.ElapsedSeconds > EXECUTION_TIME)
+					{
+						subject.AnimateTool = false;
+						subject.town.House.IsBuilt = true;
+						this.Status = ExecutionStatus.Complete;
+					}
 				}
 			}
 		}
@@ -349,9 +356,8 @@ namespace ProtoGOAP.Demo
 				}
 				else
 				{
-					this.subject.CurrentResource = resourceType;
-					source.SetResourceCount(resourceType, source.GetResourceCount(resourceType) - 1);
-					Status = ExecutionStatus.Complete;
+					subject.MoveTo(source.transform.position);
+					Status = ExecutionStatus.InProgress;
 				}
 			}
 
@@ -365,7 +371,12 @@ namespace ProtoGOAP.Demo
 
 			protected override void UpdateImpl()
 			{
-				
+				if(this.Status == ExecutionStatus.InProgress && subject.ReachedDestination)
+				{
+					this.subject.CurrentResource = resourceType;
+					source.SetResourceCount(resourceType, source.GetResourceCount(resourceType) - 1);
+					Status = ExecutionStatus.Complete;
+				}
 			}
 		}
 
@@ -389,9 +400,8 @@ namespace ProtoGOAP.Demo
 				}
 				else
 				{
-					this.subject.CurrentResource = ResourceType.None;
-					target.SetResourceCount(resourceType, target.GetResourceCount(resourceType) + 1);
-					Status = ExecutionStatus.Complete;
+					subject.MoveTo(target.transform.position);
+					this.Status = ExecutionStatus.InProgress;
 				}
 			}
 
@@ -405,7 +415,12 @@ namespace ProtoGOAP.Demo
 
 			protected override void UpdateImpl()
 			{
-
+				if(Status == ExecutionStatus.InProgress && subject.ReachedDestination)
+				{
+					this.subject.CurrentResource = ResourceType.None;
+					target.SetResourceCount(resourceType, target.GetResourceCount(resourceType) + 1);
+					Status = ExecutionStatus.Complete;
+				}
 			}
 		}
 
@@ -433,9 +448,8 @@ namespace ProtoGOAP.Demo
 				}
 				else
 				{
-					this.subject.CurrentTool = toolType;
-					source.SetToolCount(toolType, source.GetToolCount(toolType) - 1);
-					Status = ExecutionStatus.Complete;
+					subject.MoveTo(source.transform.position);
+					Status = ExecutionStatus.InProgress;
 				}
 			}
 
@@ -449,7 +463,12 @@ namespace ProtoGOAP.Demo
 
 			protected override void UpdateImpl()
 			{
-
+				if(Status == ExecutionStatus.InProgress && subject.ReachedDestination)
+				{
+					this.subject.CurrentTool = toolType;
+					source.SetToolCount(toolType, source.GetToolCount(toolType) - 1);
+					Status = ExecutionStatus.Complete;
+				}
 			}
 		}
 
@@ -473,9 +492,8 @@ namespace ProtoGOAP.Demo
 				}
 				else
 				{
-					this.subject.CurrentTool = ToolType.None;
-					target.SetToolCount(toolType, target.GetToolCount(toolType) + 1);
-					Status = ExecutionStatus.Complete;
+					subject.MoveTo(target.transform.position);
+					Status = ExecutionStatus.InProgress;
 				}
 			}
 
@@ -489,7 +507,12 @@ namespace ProtoGOAP.Demo
 
 			protected override void UpdateImpl()
 			{
-
+				if(Status == ExecutionStatus.InProgress && subject.ReachedDestination)
+				{
+					this.subject.CurrentTool = ToolType.None;
+					target.SetToolCount(toolType, target.GetToolCount(toolType) + 1);
+					Status = ExecutionStatus.Complete;
+				}
 			}
 		}
 
@@ -498,6 +521,8 @@ namespace ProtoGOAP.Demo
 			private const float EXECUTION_TIME = 3.0f;
 
 			private readonly ITimer timer;
+
+			private GameObject selectedTree;
 
 			public ActionCutTree(Townsman subject)
 				: base(subject)
@@ -514,8 +539,8 @@ namespace ProtoGOAP.Demo
 					throw new InvalidOperationException("has no axe");
 				}
 
-				this.timer.Resume();
-				this.subject.AnimateTool = true;
+				this.selectedTree = subject.FindClosestTree();
+				subject.MoveTo(selectedTree.transform.position);
 				this.Status = ExecutionStatus.InProgress;
 			}
 
@@ -530,16 +555,24 @@ namespace ProtoGOAP.Demo
 
 			protected override void UpdateImpl()
 			{
-				if(this.Status == ExecutionStatus.InProgress && this.timer.ElapsedSeconds > EXECUTION_TIME)
+				if(Status == ExecutionStatus.InProgress)
 				{
-					this.subject.AnimateTool = false;
-					if(this.subject.resourceType != ResourceType.None)
+					if(timer.IsPaused && subject.ReachedDestination)
 					{
-						throw new InvalidOperationException("already carying another resource");
+						this.timer.Resume();
+						this.subject.AnimateTool = true;
 					}
-					this.subject.resourceType = ResourceType.Planks;
-					// TODO: Make the tree disappear
-					this.Status = ExecutionStatus.Complete;
+					else if(!timer.IsPaused && timer.ElapsedSeconds > EXECUTION_TIME)
+					{
+						this.subject.AnimateTool = false;
+						if(this.subject.CurrentResource != ResourceType.None)
+						{
+							throw new InvalidOperationException("already carying another resource");
+						}
+						this.subject.CurrentResource = ResourceType.Planks;
+						Destroy(this.selectedTree);
+						this.Status = ExecutionStatus.Complete;
+					}
 				}
 			}
 

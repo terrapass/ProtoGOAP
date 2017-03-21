@@ -1,10 +1,19 @@
 ﻿using UnityEngine;
 using System;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace ProtoGOAP.Demo
 {
 	public class Storage : MonoBehaviour
 	{
+		[Serializable]
+		private struct StackViewPair
+		{
+			public ResourceType resourceType;
+			public StackView stackView;
+		}
+
 		[SerializeField]
 		private int logs;
 		[SerializeField]
@@ -15,6 +24,39 @@ namespace ProtoGOAP.Demo
 		private int iron;
 		[SerializeField]
 		private int stone;
+		[SerializeField]
+		private Town town;
+		[SerializeField]
+		private StackViewPair[] stackViewPairs;
+
+		private IDictionary<ResourceType, StackView> stackViews;
+
+		void Start()
+		{
+			this.stackViews = new Dictionary<ResourceType, StackView>();
+			foreach(var pair in stackViewPairs)
+			{
+				pair.stackView.SingleViewPrefab = town.ResourcePrefabs[pair.resourceType];
+				this.stackViews.Add(pair.resourceType, pair.stackView);
+			}
+		}
+
+		void Update()
+		{
+			SafeUpdateStack(ResourceType.Logs, logs);
+			SafeUpdateStack(ResourceType.Planks, planks);
+			SafeUpdateStack(ResourceType.Ore, ore);
+			SafeUpdateStack(ResourceType.Iron, iron);
+			SafeUpdateStack(ResourceType.Stone, stone);
+		}
+
+		private void SafeUpdateStack(ResourceType resourceType, int count)
+		{
+			if(stackViews.ContainsKey(resourceType))
+			{
+				stackViews[resourceType].Count = count;
+			}
+		}
 
 		public int GetResourceCount(ResourceType resourceType)
 		{
