@@ -14,6 +14,8 @@ using Terrapass.Debug;
 
 namespace ProtoGOAP.Demo
 {
+	using UI;
+
 	// TODO: Encapsulate view logic in a separate TownsmanView class
 	public partial class Townsman : MonoBehaviour
 	{
@@ -21,6 +23,9 @@ namespace ProtoGOAP.Demo
 		private const float TOOL_ANIMATION_TO_IDLE_LERP = 0.25f;
 		private const float IDLE_TOOL_ANGLE = 75f;
 		private const float MAX_TOOL_ANGLE = 190f;
+
+		[SerializeField]
+		private PlanExecutionStatePanel planExecutionStatePanel;
 
 		[SerializeField]
 		private Town town;
@@ -87,6 +92,9 @@ namespace ProtoGOAP.Demo
 
 			// Init view
 			this.toolAnimationTimer = new ResettableExecutionTimer(true);
+
+			// Init UI
+			this.planExecutionStatePanel.PlanExecution = planExecutor.CurrentExecution;
 		}
 
 		void Update()
