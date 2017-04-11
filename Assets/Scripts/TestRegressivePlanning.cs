@@ -3,9 +3,9 @@ using System.Linq;
 using System.Collections.Generic;
 using UnityEngine;
 
-using ProtoGOAP.Planning;
-using ProtoGOAP.Planning.Preconditions;
-using ProtoGOAP.Planning.Effects;
+using Terrapass.GameAi.Goap.Planning;
+using Terrapass.GameAi.Goap.Planning.Preconditions;
+using Terrapass.GameAi.Goap.Planning.Effects;
 using Terrapass.Time;
 
 public class TestRegressivePlanning : MonoBehaviour

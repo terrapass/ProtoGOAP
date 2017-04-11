@@ -3,7 +3,7 @@ using System;
 
 using Terrapass.Debug;
 
-using ProtoGOAP.Planning;
+using Terrapass.GameAi.Goap.Planning;
 
 namespace ProtoGOAP.Demo
 {

@@ -6,7 +6,7 @@ using UnityEngine;
 
 using Terrapass.Time;
 
-using ProtoGOAP.Graphs;
+using Terrapass.GameAi.Goap.Graphs;
 
 public class TestAstarPathfinding : MonoBehaviour
 {

@@ -3,8 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
-using ProtoGOAP.Planning;
-using ProtoGOAP.Planning.Preconditions;
+using Terrapass.GameAi.Goap.Planning;
+using Terrapass.GameAi.Goap.Planning.Preconditions;
 
 public static class TestUtils
 {

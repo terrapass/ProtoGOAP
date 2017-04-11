@@ -7,9 +7,9 @@ using System.Linq;
 using Terrapass.Extensions.Unity;
 using Terrapass.Time;
 
-using ProtoGOAP.Agents;
-using ProtoGOAP.Planning;
-using ProtoGOAP.Planning.Preconditions;
+using Terrapass.GameAi.Goap.Agents;
+using Terrapass.GameAi.Goap.Planning;
+using Terrapass.GameAi.Goap.Planning.Preconditions;
 using Terrapass.Debug;
 
 namespace ProtoGOAP.Demo

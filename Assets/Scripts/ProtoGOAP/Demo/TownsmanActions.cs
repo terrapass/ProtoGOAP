@@ -6,10 +6,10 @@ using System.Linq;
 using Terrapass.Debug;
 using Terrapass.Time;
 
-using ProtoGOAP.Planning;
-using ProtoGOAP.Agents;
-using ProtoGOAP.Planning.Preconditions;
-using ProtoGOAP.Planning.Effects;
+using Terrapass.GameAi.Goap.Planning;
+using Terrapass.GameAi.Goap.Agents;
+using Terrapass.GameAi.Goap.Planning.Preconditions;
+using Terrapass.GameAi.Goap.Planning.Effects;
 
 namespace ProtoGOAP.Demo
 {

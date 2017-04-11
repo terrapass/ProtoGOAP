@@ -4,7 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
-using ProtoGOAP.Agents;
+using Terrapass.GameAi.Goap.Agents;
 
 namespace ProtoGOAP.Demo.UI
 {
